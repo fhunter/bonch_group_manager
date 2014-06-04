@@ -41,7 +41,7 @@ if "searchkey" in form:
 	header_html()
 	table = u"<table><tr><td>Группа</td><td>Пользователи</td></tr>"
 	for i in grp.getgrall():
-	  	if (i[2] >= 1000) and (i[2] <=64000):
+	  	if (i[2] > 1000) and (i[2] <=64000):
 			table += "<tr><td>" + unicode(i[0]) + "</td><td>"
 			for p in i[3]:
 				#FIXME: add links to user info
