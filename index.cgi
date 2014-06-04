@@ -6,6 +6,8 @@ import pwd
 import grp
 cgitb.enable()
 
+userbase=u"/selfreg/?getuser="
+
 mainpage=u"""
 <h1>Добавление и просмотр групп</h1>
 <form method="get" action="./" name="groupsearch">
@@ -45,7 +47,7 @@ if "searchkey" in form:
 			table += "<tr><td>" + unicode(i[0]) + "</td><td>"
 			for p in i[3]:
 				#FIXME: add links to user info
-				table += unicode(p) + " "
+				table += "<a href=\""+userbase + p +"\">" + unicode(p) + "</a> "
 			table += "</td></tr>"
 	table+="</table>"
 	print_ui(mainpage % (table,))
