@@ -41,13 +41,19 @@ form = cgi.FieldStorage()
 
 if "searchkey" in form:
 	header_html()
-	table = u"<table><tr><td>Группа</td><td>Пользователи</td></tr>"
+	table = u"<table border=1><tr><td>Группа</td><td>Пользователи</td><td>Комментарий к группе</td></tr>"
 	for i in grp.getgrall():
 	  	if (i[2] > 1000) and (i[2] <=64000):
 			table += "<tr><td>" + unicode(i[0]) + "</td><td>"
+	  		table += u"<table width=\"100%\"><tr>"
+			k=0
 			for p in i[3]:
 				#FIXME: add links to user info
-				table += "<a href=\""+userbase + p +"\">" + unicode(p) + "</a> "
+				table += "<td><a href=\""+userbase + p +"\">" + unicode(p) + "</a></td>"
+				if k%5 ==4:
+					table += "</tr><tr>"
+				k= k+1
+			table += "</td></tr></table>"
 			table += "</td></tr>"
 	table+="</table>"
 	print_ui(mainpage % (table,))
