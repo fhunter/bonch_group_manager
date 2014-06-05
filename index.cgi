@@ -48,9 +48,8 @@ if "searchkey" in form:
 	  		table += u"<table width=\"100%\"><tr>"
 			k=0
 			for p in i[3]:
-				#FIXME: add links to user info
-				table += "<td><a href=\""+userbase + p +"\">" + unicode(p) + "</a></td>"
-				if k%5 ==4:
+				table += "<td width=12.5%><a href=\""+userbase + p +"\">" + unicode(p) + "</a></td>"
+				if k%8 == 7:
 					table += "</tr><tr>"
 				k= k+1
 			table += "</td></tr></table>"
