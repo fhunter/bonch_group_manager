@@ -30,7 +30,7 @@ def header_html():
 
 def print_ui(page):
 	print """
-	<html><meta http-equiv="Content-Type" content="text/html;charset=utf8"><head></head><body>
+	<html><head><meta http-equiv="Content-Type" content="text/html;charset=utf8"></head><body>
 	"""
 	print page.encode('utf-8')
 	print """
@@ -52,7 +52,7 @@ if "searchkey" in form:
 				if k%8 == 7:
 					table += "</tr><tr>"
 				k= k+1
-			table += "</td></tr></table>"
+			table += "</tr></table>"
 			table += "</td></tr>"
 	table+="</table>"
 	print_ui(mainpage % (table,))
