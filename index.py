@@ -14,9 +14,23 @@ mainpage=u"""
 Ключ фильтра:<input type="text" name="searchkey">
 <input type="submit" value="Submit">
 </form>
+<form method="post" action="" name="groupadd">
+Название группы:<input type="text" name="groupname">
+Количество студентов:<select name="number">
+<option value="50" >50</option>
+<option value="40" >40</option>
+<option value="30" >30</option>
+</select> 
+<input type="submit" value="Submit">
+</form>
+<a href="./?listadd=html">Очередь добавления групп</a><br>
 %s
-<br>
-<a href="./?listadd=html">Очередь добавления групп</a>
+
+"""
+
+queuepage=u"""
+<h1>Очередь добавления групп</h1>
+<a href="./">На главную</a>
 """
 
 errorpage=u"""
@@ -39,7 +53,12 @@ def print_ui(page):
 
 form = cgi.FieldStorage()
 
-if "searchkey" in form:
+if "listadd" in form:
+	header_html()
+	print_ui(queuepage)
+	exit(0)
+
+if "searchkey" in form or 1:
 	header_html()
 	table = u"<table border=1><tr><td>Группа</td><td>Пользователи</td><td>Комментарий к группе</td></tr>"
 	for i in grp.getgrall():
