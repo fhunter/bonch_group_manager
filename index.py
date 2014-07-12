@@ -4,6 +4,7 @@ import cgi
 import cgitb
 import pwd
 import grp
+from my_db import db_exec_sql
 cgitb.enable()
 
 userbase=u"/selfreg/?page=getuser&getuser="
@@ -84,7 +85,11 @@ def showgroup_ui(form):
 			k= k+1
 		grptable += "</tr></table>"
 		table += grptable
-		comment = "asdf"
+		comment = db_exec_sql('select comment from comments where groupname = ?', (group,))
+		if comment == []:
+			comment = ""
+		else:
+			comment = comment[0][0]
 		table += u"</td><td>%s</td></tr>" % (comment, )
 		print_ui(showgrouppage % (group,table,))
 	else:
@@ -97,15 +102,12 @@ def mainpage_ui(form):
 			table += "<tr><td><a href=./?page=showgroup&group=" + unicode(i[0]) + ">" + unicode(i[0]) + "</a></td>"
 			k=len(i[3])
 			table += u"<td>%d</td>" % k
-#	  		table += u"<table width=\"100%\"><tr>"
-#			k=0
-#			for p in i[3]:
-#				table += "<td width=12.5%><a href=\""+userbase + p +"\">" + unicode(p) + "</a></td>"
-#				if k%8 == 7:
-#					table += "</tr><tr>"
-#				k= k+1
-#			table += "</tr></table>"
-			table += "<td></td></tr>"
+			comment = db_exec_sql('select comment from comments where groupname = ?', (i[0],))
+			if comment == []:
+				comment = ""
+			else:
+				comment = comment[0][0]
+			table += "<td>%s</td></tr>" % (comment, )
 	table+="</table>"
 	print_ui(mainpage % (table,))
 	pass
