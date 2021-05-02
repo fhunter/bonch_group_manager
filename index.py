@@ -1,8 +1,11 @@
 #!/usr/bin/env python
+# vim: set fileencoding=utf-8 :
+
 import bottle
 from bottle import HTTPError
 from bottle.ext import sqlalchemy
 from sqlalchemy import create_engine, Column, Integer, Sequence, String
+from sqlalchemy.types import DateTime, Date, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
@@ -20,34 +23,61 @@ plugin = sqlalchemy.Plugin(
 
 app.install(plugin)
 
-class Entity(Base):
-    __tablename__ = 'entity'
+class Group(Base):
+    __tablename__ = 'group'
     id = Column(Integer, Sequence('id_seq'), primary_key=True)
-    name = Column(String(50))
+    name = Column(String(8))
+    nrusers = Column(Integer)
+    description = Column(String) # Описание группы - цель
+    last_reset = Column(DateTime)
+    next_reset = Column(Date)
+    # Здесь должен быть статус пользователей - логинились или нет
+    # И пароли
+    responsible = Column(String) # Ответственный преподаватель
+    requests = Column(String) # Запросы на права и софт для группы
+    issue = Column(String) # Ссылка на issue в gitea
 
-    def __init__(self, name):
-        self.name = name
+class GroupUser(Base):
+    __tablename__ = 'groupuser'
+    id = Column(Integer, Sequence('id_seq'), primary_key=True)
+    name = Column(String(11)) # 8 + 3 (for n[0-9][0-9])
+    password = Column(String)
+    is_present = Column(Boolean)
+    hadlogin = Column(Boolean) # Был ли вход
 
-    def __repr__(self):
-        return "<Entity('%d', '%s')>" % (self.id, self.name)
+#class Entity(Base):
+#    __tablename__ = 'entity'
+#    id = Column(Integer, Sequence('id_seq'), primary_key=True)
+#    name = Column(String(50))
+#
+#    def __init__(self, name):
+#        self.name = name
+#
+#    def __repr__(self):
+#        return "<Entity('%d', '%s')>" % (self.id, self.name)
 
+@app.get('/',sqlalchemy=dict(use_kwargs=True))
+@bottle.view('mainpage')
+def mainview(db):
+    entity = db.query(Group)
+    return dict(entity)
 
-@app.get('/:name')
-def show(name, db):
-    entity = db.query(Entity).filter_by(name=name).first()
-    if entity:
-        return {'id': entity.id, 'name': entity.name}
-    return HTTPError(404, 'Entity not found.')
+#@app.get('/:name')
+#def show(name, db):
+#    entity = db.query(Entity).filter_by(name=name).first()
+#    if entity:
+#        return {'id': entity.id, 'name': entity.name}
+#    return HTTPError(404, 'Entity not found.')
 
-@app.put('/:name')
-def put_name(name, db):
-    entity = Entity(name)
-    db.add(entity)
+#@app.put('/:name')
+#def put_name(name, db):
+#    entity = Entity(name)
+#    db.add(entity)
 
-@app.get('/spam/:eggs', sqlalchemy=dict(use_kwargs=True))
-@bottle.view('some_view')
-def route_with_view(eggs, db):
-    pass
-    # do something useful here
+#@app.get('/spam/:eggs', sqlalchemy=dict(use_kwargs=True))
+#@bottle.view('some_view')
+#def route_with_view(eggs, db):
+#    pass
+#    # do something useful here
 
 app.run(server=bottle.CGIServer)
