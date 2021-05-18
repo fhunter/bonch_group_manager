@@ -26,7 +26,7 @@ app.install(plugin)
 class Group(Base):
     __tablename__ = 'group'
     id = Column(Integer, Sequence('id_seq'), primary_key=True)
-    name = Column(String(8))
+    name = Column(String(8), unique=True)
     nrusers = Column(Integer)
     description = Column(String) # Описание группы - цель
     last_reset = Column(DateTime)
@@ -37,6 +37,12 @@ class Group(Base):
     requests = Column(String) # Запросы на права и софт для группы
     issue = Column(String) # Ссылка на issue в gitea
 
+    def __init__(self, name, number=40):
+        self.name=name
+	self.nrusers=number
+    def __repr__(self):
+        return "Group(name=%r, users=%r, %s, %s, %s, %s, %s, %s)" % (self.name, self.nrusers, self.description, self.last_reset, self.next_reset, self.responsible, self.requests, self.issue)
+
 class GroupUser(Base):
     __tablename__ = 'groupuser'
     id = Column(Integer, Sequence('id_seq'), primary_key=True)
@@ -45,22 +51,48 @@ class GroupUser(Base):
     is_present = Column(Boolean)
     hadlogin = Column(Boolean) # Был ли вход
 
-#class Entity(Base):
-#    __tablename__ = 'entity'
-#    id = Column(Integer, Sequence('id_seq'), primary_key=True)
-#    name = Column(String(50))
-#
-#    def __init__(self, name):
-#        self.name = name
-#
-#    def __repr__(self):
-#        return "<Entity('%d', '%s')>" % (self.id, self.name)
-
 @app.get('/',sqlalchemy=dict(use_kwargs=True))
 @bottle.view('mainpage')
 def mainview(db):
-    entity = db.query(Group)
-    return dict(entity)
+    active = db.query(Group)
+    due = db.query(Group)
+    to_delete = db.query(Group)
+    create = db.query(Group)
+    return {'active':active, 'due': due, 'delete': to_delete, 'create': create }
+
+@app.post('/group/create/<name:re:[a-zA-Z][a-zA-Z0-9]*>/<number:int>')
+def groupcreate(name,number,db):
+    group=Group(name,number)
+    db.add(group)
+    db.commit()
+    return dict()
+
+@app.get('/group/create/<name:re:[a-zA-Z][a-zA-Z0-9]*>/<number:int>') # FIXME - this is for debug
+def groupcreate(name,number,db):
+    group=Group(name,number)
+    db.add(group)
+    db.commit()
+    return dict()
+
+@app.delete('/group/delete/<name>')
+def groupdelete(name):
+    return dict()
+
+@app.get('/group')
+def groupget():
+    return dict()
+
+@app.get('/group/get/<name>')
+def groupgetdetails(name):
+    return dict()
+
+@app.post('/group/passwords/<name>')
+def group_reset_passwords(name):
+    return dict()
+
+@app.get('/group/passwords/<name>')
+def group_get_passwords(name):
+    return dict()
 
 #@app.get('/:name')
 #def show(name, db):
