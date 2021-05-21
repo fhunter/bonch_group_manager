@@ -54,10 +54,11 @@ class GroupUser(Base):
 @app.get('/',sqlalchemy=dict(use_kwargs=True))
 @bottle.view('mainpage')
 def mainview(db):
-    active = db.query(Group)
-    due = db.query(Group)
-    to_delete = db.query(Group)
-    create = db.query(Group)
+    temp_query = db.query(Group)
+    active = temp_query
+    due = temp_query
+    to_delete = temp_query
+    create = temp_query
     return {'active':active, 'due': due, 'delete': to_delete, 'create': create }
 
 @app.post('/group/create/<name:re:[a-zA-Z][a-zA-Z0-9]*>/<number:int>')
