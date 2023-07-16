@@ -1,16 +1,15 @@
 %include header
-<h1>Группы школьников</h1>
-<h2>Активные группы</h2>
+<h1>Пользователи и группы</h1>
+<h2>Студенческие группы</h2>
 %include table data=active,buttonscode=''
 <hr/>
-<h2>На создание</h2>
+<h2>Персонал</h2>
 %include table data=create,buttonscode=''
 <hr/>
-<h2>На смену пароля</h2>
+<h2>Преподаватели</h2>
 %include table data=due,buttonscode=''
 <hr/>
 <h2>Очередь удаления</h2>
 %include table data=delete,buttonscode=''
 <hr/>
-%include menu
 %include footer

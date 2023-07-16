@@ -1,4 +1,6 @@
 <a href=./><button>На главную</button></a>
-% if defined ('username'):
-	<a href=./reset/{{username}}><button>Сбросить пароль</button></a>
-% end
+<a href=./><button>Студенты</button></a>
+<a href=./><button>Персонал</button></a>
+<a href=./><button>Преподаватели</button></a>
+<a href=./><button>Очередь обработки</button></a>
+<a href=./><button>Статистика</button></a>

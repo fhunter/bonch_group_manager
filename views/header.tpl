@@ -1,4 +1,4 @@
-%setdefault ('title', "Управление группами школьников")
+%setdefault ('title', "Управление группами пользователей")
 <html><head>
 %import settings
 <base href="{{settings.PREFIX}}" >

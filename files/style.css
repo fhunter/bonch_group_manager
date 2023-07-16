@@ -1,0 +1,123 @@
+body {
+background: #f3f2f3;
+color: #000000;
+font-family: Trebuchet MS, Arial, Times New Roman;
+font-size: 12px;
+}
+
+#container {
+background: #FF7F00;
+margin: 30px auto;
+width: 900px;
+height: 1000px;
+}
+
+div {
+   border: 1px dashed black;
+}
+
+.UI_tab {
+  position: relative;
+  width: inherit;
+}
+
+.list_element {
+  padding: 1px;
+  margin: 1px;
+  border: 1px solid red;
+  border-radius: 6px;
+}
+
+.refresh_button {
+  text-align: right;
+}
+
+.edit_delete_button {
+  text-align: right;
+  width: 100%;
+}
+
+.field_name {
+  background: red;
+  display: table-cell;
+  border-radius: 6px;
+}
+
+.field_value {
+  background: yellow;
+  display: table-cell;
+  border: 1px dashed black;
+  border-radius: 6px;
+}
+
+#quotatable_u {
+  border: 1px black;
+  border-style: solid solid hidden solid;
+  margin-top: 2px;
+  margin-left: 2px;
+  margin-right: 2px;
+  border-collapse: collapse;
+  width: 514px;
+  height: 14px;
+}
+
+#quotatable_d {
+  border: 1px black;
+  border-style: hidden solid solid solid;
+  margin-bottom: 2px;
+  margin-left: 2px;
+  margin-right: 2px;
+  border-collapse: collapse;
+  width: 514px;
+  height: 14px;
+}
+
+#header {
+background: #838283;
+height: 50px;
+width: 900px;
+}
+
+h1 {
+color: red;
+}
+
+#input_form {
+background: #838333;
+float: left;
+width: 400px;
+height: 600px;
+}
+
+#check_results {
+background: #d2d0d2;
+float: right;
+width: 500px;
+height: 600px;
+}
+
+#field_container {
+height: 40px;
+width: 400px;
+margin: 2px auto;
+background: #338383;
+}
+
+#field_name {
+float: left;
+background: green;
+width: 100px;
+}
+
+#field_value {
+background: blue;
+float: right;
+width: 300px;
+}
+
+.userid {
+float: right; 
+padding: 1px;
+margin: 1px; 
+border-radius: 6px;
+}
