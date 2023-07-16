@@ -22,15 +22,35 @@ def error403(error_m):
     e_message += "</head><body><h1>Unauthorised, sorry</h1></body></html>"
     return e_message
 
-@app.get('/',sqlalchemy=dict(use_kwargs=True))
+@app.get('/')
 @bottle.view('mainpage')
-def mainview(db):
-    temp_query = db.query(Group)
-    active = temp_query
-    due = temp_query
-    to_delete = temp_query
-    create = temp_query
-    return {'active':active, 'due': due, 'delete': to_delete, 'create': create }
+def mainview():
+    return dict()
+
+@app.get('/students')
+@bottle.view('students')
+def studentsview():
+    return dict()
+
+@app.get('/teachers')
+@bottle.view('teachers')
+def teachersview():
+    return dict()
+
+@app.get('/personal')
+@bottle.view('personal')
+def personalview():
+    return dict()
+
+@app.get('/statistics')
+@bottle.view('statistics')
+def statisticsview():
+    return dict()
+
+@app.get('/queue')
+@bottle.view('queue')
+def queueview():
+    return dict()
 
 @app.post('/group/create/<name:re:[a-zA-Z][a-zA-Z0-9]*>/<number:int>')
 def groupcreate(name,number,db):
