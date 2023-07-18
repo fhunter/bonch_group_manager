@@ -19,12 +19,12 @@ def db_exec_sql(*params):
     raise Exception("Not implemented %s" % (params))
 
 class RequestType(enum.Enum):
-    STUDENT = 1
+    STUDENTS = 1
     PERSONAL = 2
-    TEACHER = 3
+    TEACHERS = 3
 
 class Queue(Base):
-    __tablename__ = 'queue'
+    __tablename__ = "queue"
     id = Column(Integer, primary_key=True)
     username = Column(String, nullable=False)
     request_type = Column(Enum(RequestType), nullable=False)
@@ -32,14 +32,23 @@ class Queue(Base):
     due_date = Column(DateTime,nullable=True, default=None)
     done = Column(Boolean, nullable=False, default=False)
     actedby = Column(String)
+    discriminator = Column('type', String(50))
+    __mapper_args__ = {'polymorphic_on': discriminator}
 
     def __repr__(self):
-        return "<Queue(username='%s' date='%s' due_date='%s' done='%s' request_type='%s' acted by='%s')>" % (
+        return "<Queue(username='%s' date='%s' due_date='%s' done='%s' request_type='%s' acted by='%s' discriminator='%s')>" % (
             self.username,
             self.date,
             self.due_date,
             self.done,
             self.request_type,
-            self.actedby)
+            self.actedby,
+            self.discriminator)
+ 
+class AddQueue(Queue):
+    __mapper_args__ = {'polymorphic_identity': 'add'}
+ 
+class DelQueue(Queue):
+    __mapper_args__ = {'polymorphic_identity': 'del'}
 
 Base.metadata.create_all(engine)

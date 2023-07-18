@@ -80,3 +80,8 @@ def require_groups(groups):
             abort(403, "Unauthorised")
         return wrap_require_groups
     return decorator_require_groups
+
+class AttrDict(dict):
+    def __init__(self, *args, **kwargs):
+        super(AttrDict, self).__init__(*args, **kwargs)
+        self.__dict__ = self

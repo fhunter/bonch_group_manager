@@ -2,18 +2,33 @@
 # vim: set fileencoding=utf-8 :
 
 """ Main web app module """
+import re
 import pwd
 import grp
 import bottle
 from bottle import view, request, response, static_file, abort, redirect
 from sqlalchemy import or_, func
 import settings
-from my_db import Queue, Session
+from my_db import AddQueue, DelQueue, Session, RequestType
 from utils import getcurrentuser, normaliseuser
 from utils import require_groups, require_users
 from utils import get_users_groups
+from utils import AttrDict
 
 app = application = bottle.Bottle()
+
+def list2queue(lst, request_type):
+    lst2 = []
+    for i in lst:
+        tmp = AttrDict()
+        tmp['username'] = i
+        tmp['request_type'] = request_type
+        tmp['date'] = None
+        tmp['due_date'] = None
+        tmp['done'] = True
+        tmp['actedby'] = None
+        lst2.append(tmp)
+    return lst2
 
 @app.error(403)
 def error403(error_m):
@@ -30,17 +45,35 @@ def mainview():
 @app.get('/students')
 @bottle.view('students')
 def studentsview():
-    return dict()
+    students_group = grp.getgrnam(settings.STUDENT_GROUP).gr_gid
+    groups = list(set([re.sub(r'n[0-9][0-9]$','',i.pw_name)  for i in pwd.getpwall() if (i.pw_gid==students_group) and (i.pw_uid>=1000)]))
+    groups = list2queue(groups, RequestType.STUDENTS)
+# FIXME: smart join
+    s = Session()
+    groups2 = s.query(AddQueue).filter(AddQueue.request_type == RequestType.STUDENTS).all()
+    return dict(data = groups2 + groups)
 
 @app.get('/teachers')
 @bottle.view('teachers')
 def teachersview():
-    return dict()
+    teachers_group = grp.getgrnam(settings.TEACHERS_GROUP).gr_gid
+    groups = list(set([i.pw_name for i in pwd.getpwall() if (i.pw_gid==teachers_group) and (i.pw_uid>=1000)]))
+    groups = list2queue(groups, RequestType.TEACHERS)
+# FIXME: smart join
+    s = Session()
+    groups2 = s.query(AddQueue).filter(AddQueue.request_type == RequestType.TEACHERS).all()
+    return dict(data = groups2 + groups)
 
 @app.get('/personal')
 @bottle.view('personal')
 def personalview():
-    return dict()
+    personal_group = grp.getgrnam(settings.PERSONAL_GROUP).gr_gid
+    groups = list(set([i.pw_name for i in pwd.getpwall() if (i.pw_gid==personal_group) and (i.pw_uid>=1000)]))
+    groups = list2queue(groups, RequestType.PERSONAL)
+# FIXME: smart join
+    s = Session()
+    groups2 = s.query(AddQueue).filter(AddQueue.request_type == RequestType.PERSONAL).all()
+    return dict(data = groups2 + groups)
 
 @app.get('/statistics')
 @bottle.view('statistics')
@@ -50,78 +83,75 @@ def statisticsview():
 @app.get('/queue')
 @bottle.view('queue')
 def queueview():
-    return dict()
+    s = Session()
+    add_queue = s.query(AddQueue).all()
+    del_queue = s.query(DelQueue).all()
+    return dict(add_queue= add_queue, del_queue = del_queue)
 
-@app.post('/group/create/<name:re:[a-zA-Z][a-zA-Z0-9]*>/<number:int>')
-def groupcreate(name,number,db):
-    group=Group(name,number)
-    db.add(group)
-    db.commit()
-    return dict()
+# API start
+@app.post('/<datatype:re:(students|personal|teachers)>/create/')
+def request_create(datatype):
+    name = request.params['name']
+# FIXME: add checks here
+    t = AddQueue(username=name, request_type = datatype.upper() )
+    s = Session()
+    s.add(t)
+    s.commit()
+    print(name)
+    redirect(f'/{datatype}')
 
-@app.route(settings.PREFIX + '/', method = 'POST')
-@require_groups(settings.ADMINGROUPS)
-@view('mainpage')
-def main_search():
-    searchkey = request.forms.getunicode('searchkey')
-    userlist=findusers(searchkey)
-    return dict(query = userlist)
+@app.route('/<datatype:re:(students|personal|teachers)>/delete/<name:re:[a-zA-Z][a-zA-Z0-9]*>')
+def request_delete(datatype,name):
+# FIXME: add checks here
+    s = Session()
+    t = DelQueue(username = name, request_type = datatype.upper())
+    s.add(t)
+    s.commit()
+    redirect(f'/{datatype}')
 
-@app.get('/group/create/<name:re:[a-zA-Z][a-zA-Z0-9]*>/<number:int>') # FIXME - this is for debug
-def groupcreate(name,number,db):
-    group=Group(name,number)
-    db.add(group)
-    db.commit()
-    return dict()
+@app.route('/<datatype:re:(students|personal|teachers)>/cancel/<name:re:[a-zA-Z][a-zA-Z0-9]*>')
+def request_cancel(datatype,name):
+    s = Session()
+# FIXME: add checks here
+    result = s.query(AddQueue).filter(AddQueue.username == name).filter(AddQueue.request_type == datatype.upper()).filter(done == False).all()
+    for i in result:
+        s.delete(i)
+    s.commit()
+    redirect(f'/{datatype}')
 
-@app.delete('/group/delete/<name>')
-def groupdelete(name):
-    return dict()
+@app.route('/<datatype:re:(addqueue|delqueue)>/cancel/<name:re:[a-zA-Z][a-zA-Z0-9]*>')
+def request_queue_cancel(datatype,name):
+    s = Session()
+# FIXME: add checks here
+    result = []
+    if datatype == "addqueue":
+        result = s.query(AddQueue).filter(AddQueue.username == name).filter(AddQueue.done == False).all()
+    elif datatype == "delqueue":
+        result = s.query(DelQueue).filter(DelQueue.username == name).filter(DelQueue.done == False).all()
+    for i in result:
+        s.delete(i)
+    s.commit()
+    redirect('/queue')
 
-@app.get('/group')
-def groupget():
-    return dict()
+#@app.route(settings.PREFIX + '/', method = 'POST')
+#@require_groups(settings.ADMINGROUPS)
+#@view('mainpage')
+#def main_search():
+#    searchkey = request.forms.getunicode('searchkey')
+#    userlist=findusers(searchkey)
+#    return dict(query = userlist)
 
-@app.get('/group/get/<name>')
-def groupgetdetails(name):
-    return dict()
+##- TODO: make it so, after debug . Should be available only from 127.0.0.1
+#@app.route(settings.PREFIX + '/process/newuser', method = 'POST')
+#@require_users(settings.QUOTAPROCESS)
+#def receive_users_update():
+#    """ Method takes in json array of dictionaries: username/password """
+#    data = request.json
+#    password = resetpassword(data['username'])
+#    currentuser = getcurrentuser()
+#    return dict(username=data['username'],password=password,currentuser=currentuser)
 
-@app.post('/group/passwords/<name>')
-def group_reset_passwords(name):
-    return dict()
-
-@app.get('/group/passwords/<name>')
-def group_get_passwords(name):
-    return dict()
-
-#@app.get('/:name')
-#def show(name, db):
-#    entity = db.query(Entity).filter_by(name=name).first()
-#    if entity:
-#        return {'id': entity.id, 'name': entity.name}
-#    return HTTPError(404, 'Entity not found.')
-
-#@app.put('/:name')
-#def put_name(name, db):
-#    entity = Entity(name)
-#    db.add(entity)
-
-#@app.get('/spam/:eggs', sqlalchemy=dict(use_kwargs=True))
-#@bottle.view('some_view')
-#def route_with_view(eggs, db):
-#    pass
-#    # do something useful here
-
-#- TODO: make it so, after debug . Should be available only from 127.0.0.1
-@app.route(settings.PREFIX + '/process/newuser', method = 'POST')
-@require_users(settings.QUOTAPROCESS)
-def receive_users_update():
-    """ Method takes in json array of dictionaries: username/password """
-    data = request.json
-    password = resetpassword(data['username'])
-    currentuser = getcurrentuser()
-    return dict(username=data['username'],password=password,currentuser=currentuser)
-
+# css and javascript processing
 @app.route(settings.PREFIX + r'/<filename:re:.*\.css>')
 def send_css(filename):
     #DONE
@@ -131,16 +161,6 @@ def send_css(filename):
 def send_js(filename):
     #DONE
     return static_file(filename, root='./files/', mimetype='text/javascript')
-
-class StripPathMiddleware:
-    '''
-    Get that slash out of the request
-    '''
-    def __init__(self, attr):
-        self.attr = attr
-    def __call__(self, environ, h_data):
-        environ['PATH_INFO'] = environ['PATH_INFO'].rstrip('/')
-        return self.a(environ, h_data)
 
 if __name__ == '__main__':
     bottle.run(app=app,

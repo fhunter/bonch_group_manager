@@ -1,3 +1,3 @@
 </hr>
-%include menu
+%include('menu.tpl')
 </body></html>
