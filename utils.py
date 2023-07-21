@@ -20,6 +20,13 @@ def normaliseuser(user):
     user = user.split('@')[0]
     return user
 
+def is_name_free(user):
+    passwd = None
+    try:
+        passwd = pwd.getpwnam(user)
+    except KeyError:
+        pass
+
 def get_users_groups(user):
     passwd = None
     try:

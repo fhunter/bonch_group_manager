@@ -92,9 +92,11 @@ def queueview():
 @app.post('/<datatype:re:(students|personal|teachers)>/create/')
 def request_create(datatype):
     name = request.params['name']
-# FIXME: add checks here
-    t = AddQueue(username=name, request_type = datatype.upper() )
     s = Session()
+    # Checks for adding
+    # Check if the user is present or not
+    
+    t = AddQueue(username=name, request_type = datatype.upper() )
     s.add(t)
     s.commit()
     print(name)
@@ -113,7 +115,7 @@ def request_delete(datatype,name):
 def request_cancel(datatype,name):
     s = Session()
 # FIXME: add checks here
-    result = s.query(AddQueue).filter(AddQueue.username == name).filter(AddQueue.request_type == datatype.upper()).filter(done == False).all()
+    result = s.query(AddQueue).filter(AddQueue.username == name).filter(AddQueue.request_type == datatype.upper()).filter(AddQueue.done == False).all()
     for i in result:
         s.delete(i)
     s.commit()
